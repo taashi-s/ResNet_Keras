@@ -32,9 +32,8 @@ class ResNet():
 
     def __base_block(self, input, output_channels, filter_size, first_strides=(1, 1)):
         deep_path = __deep_path(input, output_channels, filter_size, first_strides=strides)
-        norm_deep_path = BatchNormalization()(deep_path)
         shortcut = __shortcut(input, deep_path)
-        add = Add()([shortcut, norm_deep_path])
+        add = Add()([shortcut, deep_path])
         return Activation("relu")(add)
 
     def __deep_path(self, input, output_channels, filter_size, first_strides=(1, 1), with_last_Activation=False):
@@ -42,11 +41,10 @@ class ResNet():
         norm1 = BatchNormalization()(conv1)
         rl1 = Activation("relu")(norm1)
         conv2 = Conv2(output_channels, filter_size, padding='same')(rl1)
-        output = conv2
+        norm2 = BatchNormalization()(conv2)
+        output = norm2
         if with_last_Activation:
-            norm2 = BatchNormalization()(conv2)
-            rl2 = Activation("relu")(norm2)
-            output = rl2
+            output = Activation("relu")(norm2)
         return output
 
     def __shortcut(self, input, deep_path):
