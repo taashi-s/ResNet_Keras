@@ -42,7 +42,7 @@ class ResNet():
             conv1 = Conv2(output_channels / 4, 1)(input)
             norm1 = BatchNormalization()(conv1)
             rl1 = Activation("relu")(norm1)
-            conv2 = Conv2(output_channels / 4, filter_size, stride=first_strides, padding='same')(conv1)
+            conv2 = Conv2(output_channels / 4, filter_size, stride=first_strides, padding='same')(rl1)
             norm2 = BatchNormalization()(conv2)
             rl2 = Activation("relu")(norm2)
             do1 = Dropout(0.4)(rl2)
