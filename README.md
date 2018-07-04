@@ -5,5 +5,7 @@
 ```
 
 ## memo
-
+  - Bottoleneck
+  - Pre Activation
+  - WideResNet
 
