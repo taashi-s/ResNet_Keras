@@ -38,15 +38,20 @@ class ResNet():
         return Activation("relu")(add)
 
     def __deep_path(self, input, output_channels, filter_size, first_strides=(1, 1), with_last_Activation=False):
-        conv1 = Conv2(output_channels, filter_size, stride=first_strides, padding='same')(input)
-        norm1 = BatchNormalization()(conv1)
-        rl1 = Activation("relu")(norm1)
-        conv2 = Conv2(output_channels, filter_size, padding='same')(rl1)
-        output = conv2
-        if with_last_Activation:
+        output = input
+        if 0 < output_channels / 4:
+            conv1 = Conv2(output_channels / 4, 1)(input)
+            norm1 = BatchNormalization()(conv1)
+            rl1 = Activation("relu")(norm1)
+            conv2 = Conv2(output_channels / 4, filter_size, stride=first_strides, padding='same')(conv1)
             norm2 = BatchNormalization()(conv2)
             rl2 = Activation("relu")(norm2)
-            output = rl2
+            conv3 = Conv2(output_channels, 1)(rl2)
+            output = conv3
+            if with_last_Activation:
+                norm3 = BatchNormalization()(conv3)
+                rl3 = Activation("relu")(norm3)
+                output = rl3
         return output
 
     def __shortcut(self, input, deep_path):
