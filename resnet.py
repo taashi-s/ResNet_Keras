@@ -20,24 +20,34 @@ class ResNet():
 
         vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb4)
         ft1 = Flatten()(vp1)
-        outputs = Dense(1000)(ft1)
+        outputs = Dense(1000, activation="softmax")(ft1)
 
         self.MODEL = Model(inputs=[inputs], outputs=[outputs])
 
     def __first_conv(self, input, output_channels, filter_size, strides=(2, 2)):
         conv = Conv2D(output_channels, filter_size, strides=strides, padding='same',
                         input_shape=input.get_shape())(input)
+        norm = BatchNormalization()(conv)
         return Activation("relu")(norm)
 
     def __base_block(self, input, output_channels, filter_size, first_strides=(1, 1)):
         deep_path = __deep_path(input, output_channels, filter_size, first_strides=strides)
+        norm_deep_path = BatchNormalization()(deep_path)
         shortcut = __shortcut(input, deep_path)
-        return Add()([shortcut, deep_path])
+        add = Add()([shortcut, norm_deep_path])
+        return Activation("relu")(add)
 
-    def __deep_path(self, input, output_channels, filter_size, first_strides=(1, 1)):
+    def __deep_path(self, input, output_channels, filter_size, first_strides=(1, 1), with_last_Activation=False):
         conv1 = Conv2(output_channels, filter_size, stride=first_strides, padding='same')(input)
-        conv2 = Conv2(output_channels, filter_size, padding='same')(conv2)
-        return conv2
+        norm1 = BatchNormalization()(conv1)
+        rl1 = Activation("relu")(norm1)
+        conv2 = Conv2(output_channels, filter_size, padding='same')(rl1)
+        output = conv2
+        if with_last_Activation:
+            norm2 = BatchNormalization()(conv2)
+            rl2 = Activation("relu")(norm2)
+            output = rl2
+        return output
 
     def __shortcut(self, input, deep_path):
         input_shape = input.get_shape().as_list()
