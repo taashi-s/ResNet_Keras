@@ -33,24 +33,22 @@ class ResNet():
     def __base_block(self, input, output_channels, filter_size, first_strides=(1, 1)):
         deep_path = __deep_path(input, output_channels, filter_size, first_strides=strides)
         shortcut = __shortcut(input, deep_path)
-        add = Add()([shortcut, deep_path])
-        return Activation("relu")(add)
+        return Add()([shortcut, deep_path])
 
     def __deep_path(self, input, output_channels, filter_size, first_strides=(1, 1), with_last_Activation=False):
         output = input
         if 0 < output_channels / 4:
-            conv1 = Conv2(output_channels / 4, 1)(input)
-            norm1 = BatchNormalization()(conv1)
+            norm1 = BatchNormalization()(input)
             rl1 = Activation("relu")(norm1)
-            conv2 = Conv2(output_channels / 4, filter_size, stride=first_strides, padding='same')(rl1)
-            norm2 = BatchNormalization()(conv2)
+            conv1 = Conv2(output_channels / 4, 1)(rl1)
+            norm2 = BatchNormalization()(conv1)
             rl2 = Activation("relu")(norm2)
-            do1 = Dropout(0.4)(rl2)
+            conv2 = Conv2(output_channels / 4, filter_size, stride=first_strides, padding='same')(rl2)
+            norm3 = BatchNormalization()(conv2)
+            rl3 = Activation("relu")(norm3)
+            do1 = Dropout(0.4)(rl3)
             conv3 = Conv2(output_channels, 1)(do1)
-            norm3 = BatchNormalization()(conv3)
-            output = norm3
-            if with_last_Activation:
-                output = Activation("relu")(norm3)
+            output = conv3
         return output
 
     def __shortcut(self, input, deep_path):
