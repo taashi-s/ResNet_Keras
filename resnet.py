@@ -7,16 +7,16 @@ from keras.layers.merge import Add
 from keras.layers.normalization import BatchNormalization
 
 class ResNet():
-    def __init__(self, input_shape):
+    def __init__(self, input_shape, channel_width=10):
         inputs = Input(input_shape)
 
         cv1 = __first_conv(inputs, 64, 7)
         mp1 = MaxPooling2D()(cv1)
 
-        rb1 = __residual_block(mp1, 3, 64, is_first=True)
-        rb2 = __residual_block(rb1, 4, 128)
-        rb3 = __residual_block(rb2, 6, 256)
-        rb4 = __residual_block(rb3, 3, 512)
+        rb1 = __residual_block(mp1, 3, 64 * channel_width, is_first=True)
+        rb2 = __residual_block(rb1, 4, 128 * channel_width)
+        rb3 = __residual_block(rb2, 6, 256 * channel_width)
+        rb4 = __residual_block(rb3, 3, 512 * channel_width)
 
         vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb4)
         ft1 = Flatten()(vp1)
@@ -41,7 +41,8 @@ class ResNet():
         conv1 = Conv2(output_channels, filter_size, stride=first_strides, padding='same')(input)
         norm1 = BatchNormalization()(conv1)
         rl1 = Activation("relu")(norm1)
-        conv2 = Conv2(output_channels, filter_size, padding='same')(rl1)
+        do1 = Dropout(0.4)(rl1)
+        conv2 = Conv2(output_channels, filter_size, padding='same')(do1)
         output = conv2
         if with_last_Activation:
             norm2 = BatchNormalization()(conv2)
