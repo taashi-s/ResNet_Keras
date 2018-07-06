@@ -26,7 +26,7 @@ class ResNet():
         outputs = Dense(1000, activation="softmax")(ft1)
         self.__network = outputs
 
-        self.MODEL = Model(inputs=[inputs], outputs=[outputs])
+        self.__model = Model(inputs=[inputs], outputs=[outputs])
 
     def __first_conv(self, input, output_channels, filter_size, strides=(2, 2)):
         conv = Conv2D(output_channels, filter_size, strides=strides, padding='same',
@@ -91,5 +91,5 @@ class ResNet():
         return self.get_network(without_head=True)
 
     def get_model(self):
-        return self.model
+        return self.__model
 
