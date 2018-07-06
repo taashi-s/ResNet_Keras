@@ -12,13 +12,13 @@ class ResNet():
 
         inputs = Input(self.__input_shape)
 
-        cv1 = __first_conv(inputs, 64, 7)
+        cv1 = self.__first_conv(inputs, 64, 7)
         mp1 = MaxPooling2D()(cv1)
 
-        rb1 = __residual_block(mp1, 3, 64 * channel_width, is_first=True)
-        rb2 = __residual_block(rb1, 4, 128 * channel_width)
-        rb3 = __residual_block(rb2, 6, 256 * channel_width)
-        rb4 = __residual_block(rb3, 3, 512 * channel_width)
+        rb1 = self.__residual_block(mp1, 3, 64 * channel_width, is_first=True)
+        rb2 = self.__residual_block(rb1, 4, 128 * channel_width)
+        rb3 = self.__residual_block(rb2, 6, 256 * channel_width)
+        rb4 = self.__residual_block(rb3, 3, 512 * channel_width)
         self.__network_without_head = rb4
 
         vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb4)
@@ -35,8 +35,8 @@ class ResNet():
         return Activation("relu")(norm)
 
     def __base_block(self, input, output_channels, filter_size, first_strides=(1, 1)):
-        deep_path = __deep_path(input, output_channels, filter_size, first_strides=strides)
-        shortcut = __shortcut(input, deep_path)
+        deep_path = self.__deep_path(input, output_channels, filter_size, first_strides=first_strides)
+        shortcut = self.__shortcut(input, deep_path)
         return Add()([shortcut, deep_path])
 
     def __deep_path(self, input, output_channels, filter_size, first_strides=(1, 1), with_last_Activation=False):
@@ -44,14 +44,14 @@ class ResNet():
         if 0 < output_channels / 4:
             norm1 = BatchNormalization()(input)
             rl1 = Activation("relu")(norm1)
-            conv1 = Conv2(output_channels / 4, 1)(rl1)
+            conv1 = Conv2D(output_channels / 4, 1)(rl1)
             norm2 = BatchNormalization()(conv1)
             rl2 = Activation("relu")(norm2)
-            conv2 = Conv2(output_channels / 4, filter_size, stride=first_strides, padding='same')(rl2)
+            conv2 = Conv2D(output_channels / 4, filter_size, stride=first_strides, padding='same')(rl2)
             norm3 = BatchNormalization()(conv2)
             rl3 = Activation("relu")(norm3)
             do1 = Dropout(0.4)(rl3)
-            conv3 = Conv2(output_channels, 1)(do1)
+            conv3 = Conv2D(output_channels, 1)(do1)
             output = conv3
         return output
 
@@ -65,7 +65,7 @@ class ResNet():
 
         shortcut = input
         if 1 < stride_w or 1 < stride_h or not is_match_ch_num:
-            shortcut = Conv2D(rdeep_path_shape[1], 1,
+            shortcut = Conv2D(deep_path_shape[1], 1,
                                 stride=(stride_w, stride_h))(input)
         return shortcut
 
@@ -75,7 +75,7 @@ class ResNet():
             first_strides = (1, 1)
             if i == 0 and not is_first:
                 first_strides = (2, 2)
-            output = __base_block(input, output_channels, 3, first_strides=first_strides)
+            output = self.__base_block(input, output_channels, 3, first_strides=first_strides)
         return output
 
     def get_input_size(self):
@@ -92,4 +92,3 @@ class ResNet():
 
     def get_model(self):
         return self.__model
-
