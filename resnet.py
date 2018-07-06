@@ -8,7 +8,9 @@ from keras.layers.normalization import BatchNormalization
 
 class ResNet():
     def __init__(self, input_shape, channel_width=10):
-        inputs = Input(input_shape)
+        self.__input_shape = input_shape
+
+        inputs = Input(self.__input_shape)
 
         cv1 = __first_conv(inputs, 64, 7)
         mp1 = MaxPooling2D()(cv1)
@@ -17,10 +19,12 @@ class ResNet():
         rb2 = __residual_block(rb1, 4, 128 * channel_width)
         rb3 = __residual_block(rb2, 6, 256 * channel_width)
         rb4 = __residual_block(rb3, 3, 512 * channel_width)
+        self.__network_without_head = rb4
 
         vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb4)
         ft1 = Flatten()(vp1)
         outputs = Dense(1000, activation="softmax")(ft1)
+        self.__network = outputs
 
         self.MODEL = Model(inputs=[inputs], outputs=[outputs])
 
@@ -73,6 +77,18 @@ class ResNet():
                 first_strides = (2, 2)
             output = __base_block(input, output_channels, 3, first_strides=first_strides)
         return output
+
+    def get_input_size(self):
+        return self.__input_shape
+
+    def get_network(self, without_head=False):
+        if without_head:
+            return self.__network_without_head
+        else:
+            return self.__network
+
+    def get_residual_network(self):
+        return self.get_network(without_head=True)
 
     def get_model(self):
         return self.model
