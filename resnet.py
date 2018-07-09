@@ -3,6 +3,7 @@ TODO : Write description
 ResNet Module
 """
 
+import math
 from keras.models import Model
 from keras.engine.topology import Input
 from keras.layers.core import Flatten, Dense, Dropout, Activation
@@ -16,9 +17,13 @@ class ResNet():
     """
     TODO : Write description
     ResNet class
+
+    input_shape is (w, h, ch)
+    internal shape is (b, w, h, ch)
     """
 
-    def __init__(self, input_shape, channel_width=10):
+    def __init__(self, input_shape, channel_width=10, trainable=True):
+        self.__trainable = trainable
         self.__input_shape = input_shape
 
         inputs = Input(self.__input_shape)
@@ -34,7 +39,7 @@ class ResNet():
 
         vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb4)
         ft1 = Flatten()(vp1)
-        outputs = Dense(1000, activation="softmax")(ft1)
+        outputs = Dense(1000, activation="softmax", trainable=self.__trainable)(ft1)
         self.__network = outputs
 
         self.__model = Model(inputs=[inputs], outputs=[outputs])
@@ -42,7 +47,8 @@ class ResNet():
 
     def __first_conv(self, input_layer, output_channels, filter_size, strides=(2, 2)):
         conv = Conv2D(output_channels, filter_size, strides=strides, padding='same'
-                      , input_shape=input_layer.get_shape())(input_layer)
+                      , input_shape=input_layer.get_shape()
+                      , trainable=self.__trainable)(input_layer)
         norm = BatchNormalization()(conv)
         return Activation("relu")(norm)
 
@@ -54,18 +60,19 @@ class ResNet():
 
     def __deep_path(self, input_layer, output_channels, filter_size, first_strides=(1, 1)):
         output = input_layer
-        hidden_channels = output_channels / 4
+        hidden_channels = output_channels // 4
         if hidden_channels > 0:
             norm1 = BatchNormalization()(input_layer)
             rl1 = Activation("relu")(norm1)
-            conv1 = Conv2D(hidden_channels, 1)(rl1)
+            conv1 = Conv2D(hidden_channels, 1, trainable=self.__trainable)(rl1)
             norm2 = BatchNormalization()(conv1)
             rl2 = Activation("relu")(norm2)
-            conv2 = Conv2D(hidden_channels, filter_size, stride=first_strides, padding='same')(rl2)
+            conv2 = Conv2D(hidden_channels, filter_size, strides=first_strides, padding='same'
+                           , trainable=self.__trainable)(rl2)
             norm3 = BatchNormalization()(conv2)
             rl3 = Activation("relu")(norm3)
             do1 = Dropout(0.4)(rl3)
-            conv3 = Conv2D(output_channels, 1)(do1)
+            conv3 = Conv2D(output_channels, 1, trainable=self.__trainable)(do1)
             output = conv3
         return output
 
@@ -73,14 +80,15 @@ class ResNet():
         input_shape = input_layer.get_shape().as_list()
         deep_path_shape = deep_path.get_shape().as_list()
 
-        stride_w = input_shape[2] / deep_path_shape[2]
-        stride_h = input_shape[3] / deep_path_shape[3]
-        is_match_ch_num = input_shape[1] == deep_path_shape[1]
+        stride_w = math.ceil(input_shape[1] / deep_path_shape[1])
+        stride_h = math.ceil(input_shape[2] / deep_path_shape[2])
+        is_match_ch_num = input_shape[3] == deep_path_shape[3]
 
         shortcut = input_layer
         if stride_w > 1 or stride_h > 1 or not is_match_ch_num:
-            shortcut = Conv2D(deep_path_shape[1], 1
-                              , stride=(stride_w, stride_h))(input_layer)
+            shortcut = Conv2D(deep_path_shape[3], 1
+                              , strides=(stride_w, stride_h)
+                              , trainable=self.__trainable)(input_layer)
         return shortcut
 
     def __residual_block(self, input_layer, block_size, output_channels, is_first=False):
@@ -118,6 +126,13 @@ class ResNet():
     def get_model(self):
         """
         TODO : Write description
-        ResNet class
+        get_model
         """
         return self.__model
+
+    def print_model_summay(self):
+        """
+        TODO : Write description
+        print_model_summay
+        """
+        self.__model.summary()
