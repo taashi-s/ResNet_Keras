@@ -22,11 +22,13 @@ class ResNet():
     internal shape is (b, w, h, ch)
     """
 
-    def __init__(self, input_shape, channel_width=10, trainable=True):
+    def __init__(self, input_shape, input_layers=None, channel_width=10, trainable=True):
         self.__trainable = trainable
         self.__input_shape = input_shape
 
         inputs = Input(self.__input_shape)
+        if input_layers is not None:
+            inputs = input_layers
 
         cv1 = self.__first_conv(inputs, 64, 7)
         mp1 = MaxPooling2D()(cv1)
