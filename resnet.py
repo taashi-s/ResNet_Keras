@@ -54,11 +54,13 @@ class ResNet():
         norm = BatchNormalization()(conv)
         return Activation("relu")(norm)
 
+
     def __base_block(self, input_layer, output_channels, filter_size, first_strides=(1, 1)):
         deep_path = self.__deep_path(input_layer, output_channels, filter_size
                                      , first_strides=first_strides)
         shortcut = self.__shortcut(input_layer, deep_path)
         return Add()([shortcut, deep_path])
+
 
     def __deep_path(self, input_layer, output_channels, filter_size, first_strides=(1, 1)):
         output = input_layer
@@ -78,6 +80,7 @@ class ResNet():
             output = conv3
         return output
 
+
     def __shortcut(self, input_layer, deep_path):
         input_shape = input_layer.get_shape().as_list()
         deep_path_shape = deep_path.get_shape().as_list()
@@ -93,6 +96,7 @@ class ResNet():
                               , trainable=self.__trainable)(input_layer)
         return shortcut
 
+
     def __residual_block(self, input_layer, block_size, output_channels, is_first=False):
         output = input_layer
         for i in range(block_size):
@@ -102,12 +106,14 @@ class ResNet():
             output = self.__base_block(input_layer, output_channels, 3, first_strides=first_strides)
         return output
 
+
     def get_input_size(self):
         """
         TODO : Write description
         get_input_size
         """
         return self.__input_shape
+
 
     def get_network(self, without_head=False):
         """
@@ -118,6 +124,7 @@ class ResNet():
             return self.__network_without_head
         return self.__network
 
+
     def get_residual_network(self):
         """
         TODO : Write description
@@ -125,12 +132,14 @@ class ResNet():
         """
         return self.get_network(without_head=True)
 
+
     def get_model(self):
         """
         TODO : Write description
         get_model
         """
         return self.__model
+
 
     def print_model_summay(self):
         """
