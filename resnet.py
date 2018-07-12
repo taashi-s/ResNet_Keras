@@ -18,8 +18,8 @@ class ResNet():
     TODO : Write description
     ResNet class
 
-    input_shape is (w, h, ch)
-    internal shape is (b, w, h, ch)
+    input_shape is (h, w, ch)
+    internal shape is (b, h, w, ch)
     """
 
     def __init__(self, input_shape, input_layers=None, channel_width=10, trainable=True):
