@@ -4,7 +4,7 @@ import os
 from matplotlib import pyplot
 from keras.optimizers import SGD
 
-from resnet import ResNet
+from network.resnet import ResNet
 
 INPUT_SHAPE = (2048, 2048, 3)
 BATCH_SIZE = 256
