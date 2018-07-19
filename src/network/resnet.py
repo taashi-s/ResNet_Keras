@@ -37,9 +37,10 @@ class ResNet():
         rb2 = self.__residual_block(rb1, 4, 128 * channel_width)
         rb3 = self.__residual_block(rb2, 6, 256 * channel_width)
         rb4 = self.__residual_block(rb3, 3, 512 * channel_width)
-        self.__network_without_head = rb4
+        rb_out = rb4
+        self.__network_without_head = rb_out
 
-        vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb4)
+        vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb_out)
         ft1 = Flatten()(vp1)
         outputs = Dense(1000, activation="softmax", trainable=self.__trainable)(ft1)
         self.__network = outputs
@@ -103,7 +104,7 @@ class ResNet():
             first_strides = (1, 1)
             if i == 0 and not is_first:
                 first_strides = (2, 2)
-            output = self.__base_block(input_layer, output_channels, 3, first_strides=first_strides)
+            output = self.__base_block(output, output_channels, 3, first_strides=first_strides)
         return output
 
 
