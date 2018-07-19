@@ -4,6 +4,9 @@
 ```
 ```
 
+## Model Layers
+![ModelLayers](./ModelLayers.png)
+
 ## memo
   - Bottoleneck
   - Pre Activation
