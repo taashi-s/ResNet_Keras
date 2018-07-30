@@ -34,21 +34,17 @@ class ResNet():
         cv1 = self.__first_conv(inputs, 32, 7)
         mp1 = MaxPooling2D()(cv1)
 
-        #rb1 = self.__residual_block(mp1, 3, 64 * channel_width, is_first=True)
-        #rb2 = self.__residual_block(rb1, 4, 128 * channel_width)
-        #rb3 = self.__residual_block(rb2, 6, 256 * channel_width)
-        #rb4 = self.__residual_block(rb3, 3, 512 * channel_width)
-        rb1 = self.__residual_block(mp1, 3, 16 * channel_width, is_first=True)
-        rb2 = self.__residual_block(rb1, 4, 32 * channel_width)
-        rb3 = self.__residual_block(rb2, 6, 128 * channel_width)
-        rb4 = self.__residual_block(rb3, 3, 256 * channel_width)
+        rb1 = self.__residual_block(mp1, 3, 64 * channel_width, is_first=True)
+        rb2 = self.__residual_block(rb1, 4, 128 * channel_width)
+        rb3 = self.__residual_block(rb2, 6, 256 * channel_width)
+        rb4 = self.__residual_block(rb3, 3, 512 * channel_width)
         rb_out = rb4
         self.__network_without_head = rb_out
 
         vp1 = AveragePooling2D(pool_size=7, strides=1, padding='same')(rb_out)
         ft1 = Flatten()(vp1)
         #outputs = Dense(1000, activation="softmax", trainable=self.__trainable)(ft1)
-        outputs = Dense(4, activation="softmax", trainable=self.__trainable)(ft1)
+        outputs = Dense(2, activation="softmax", trainable=self.__trainable)(ft1)
         self.__network = outputs
 
         self.__model = Model(inputs=[inputs], outputs=[outputs])
